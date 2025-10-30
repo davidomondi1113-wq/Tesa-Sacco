@@ -411,6 +411,63 @@ func MakePaymentHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, `{"status":"success","message":"Payment initiated successfully"}`)
 }
 
+func LoanManagementHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("template/mfi/loan_management.html"))
+	tmpl.Execute(w, userProfile)
+}
+
+func MfiDirectoryHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("template/mfi/mfi_directory.html"))
+	tmpl.Execute(w, userProfile)
+}
+
+func ApplicationProcessingHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("template/mfi/application_processing.html"))
+	tmpl.Execute(w, userProfile)
+}
+
+func SearchHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles("template/search.html")
+	if err != nil {
+		http.Error(w, "Template not found", http.StatusInternalServerError)
+		return
+	}
+	tmpl.Execute(w, nil)
+}
+
+func SearchApiHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		fmt.Fprintf(w, `{"status":"error","message":"Invalid request method"}`)
+		return
+	}
+
+	query := r.URL.Query().Get("q")
+	if query == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, `{"status":"error","message":"Search query required"}`)
+		return
+	}
+
+	// Mock search results
+	results := []map[string]interface{}{
+		{"type": "loan", "id": "L001", "borrower": "John Doe", "amount": "5000", "status": "Active"},
+		{"type": "user", "id": "U001", "name": "Jane Smith", "email": "jane@example.com", "category": "business"},
+		{"type": "institution", "id": "I001", "name": "Equity Bank", "category": "microfinance", "location": "Nairobi"},
+	}
+
+	response := map[string]interface{}{
+		"status": "success",
+		"query": query,
+		"results": results,
+	}
+
+	jsonResponse, _ := json.Marshal(response)
+	fmt.Fprintf(w, string(jsonResponse))
+}
+
 
 
 

@@ -1,0 +1,238 @@
+<html>
+<head>
+    <title>Search - Tesaa</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            color: var(--text-color);
+            background-color: var(--light-bg);
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: #007bff !important;
+        }
+        .navbar {
+            background-color: var(--dark-bg) !important;
+        }
+        .navbar-brand{
+            font-size: larger;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        .nav-link:hover {
+            color: var(--accent-color) !important;
+        }
+        .search-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .search-results {
+            margin-top: 2rem;
+        }
+        .result-item {
+            padding: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        footer {
+            background-color: var(--dark-bg);
+            color: white;
+        }
+        .social-icon {
+            font-size: 1.5rem;
+            margin: 0 10px;
+            color: white;
+            transition: color 0.3s ease;
+        }
+        .social-icon:hover {
+            color: var(--accent-color);
+        }
+        .navbar-brand-logo {
+            display: flex;
+            align-items: center;
+        }
+        .business-logo {
+            padding: 5px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .business-logo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .business-logo svg {
+            display: block;
+        }
+        @media (max-width: 768px) {
+            .navbar-brand-logo {
+                margin-top: 10px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">Tesaa</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/search" title="Search for loans, users, or institutions">Search Feature</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register">Register</a>
+                    </li>
+                </ul>
+                <div class="navbar-brand-logo ms-auto">
+                    <div class="business-logo">
+                        <svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Professional Business Logo -->
+                            <defs>
+                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#1E88E5;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#43A047;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <!-- Background circle -->
+                            <circle cx="20" cy="20" r="18" fill="url(#logoGradient)" stroke="#fff" stroke-width="2"/>
+                            <!-- Financial symbol -->
+                            <path d="M12 12 L28 12 M12 16 L28 16 M12 20 L28 20 M12 24 L28 24 M12 28 L28 28" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="20" cy="20" r="3" fill="#FFC107"/>
+                            <!-- Company text -->
+                            <text x="45" y="16" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1E88E5">TESAA</text>
+                            <text x="45" y="28" font-family="Arial, sans-serif" font-size="8" fill="#666">Financial Solutions</text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="search-container">
+            <h2 class="text-center mb-4">Search Feature</h2>
+            <p class="text-center text-muted mb-4">Search for loans, users, or institutions</p>
+            
+            <form id="searchForm">
+                <div class="row">
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" id="searchQuery" placeholder="Enter search terms..." required>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100">Search</button>
+                    </div>
+                </div>
+            </form>
+
+            <div id="searchResults" class="search-results" style="display: none;">
+                <h4>Search Results</h4>
+                <div id="resultsContainer"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="py-4">
+        <div class="container">
+            <div class="row gy-4">
+                <div class="col-md-4">
+                    <h5>Tesaa</h5>
+                    <p>Connecting lenders and borrowers for a brighter financial future.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/about" class="text-white">About Us</a></li>
+                        <li><a href="/about" class="text-white">How It Works</a></li>
+                        <li><a href="contact" class="text-white">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Connect With Us</h5>
+                    <div class="mt-3">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="mt-4 mb-3">
+            <div class="text-center">
+                <p class="mb-1">&copy; 2025 TESA. All rights reserved.</p>
+                <p class="mb-0"><small>Built by SMARTEDGE COMPUTERS &amp; PRINTING HUB | Email: davidomondi1113@gmail.com | Contact: +254114425589</small></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const query = document.getElementById('searchQuery').value;
+            if (!query.trim()) return;
+            
+            fetch(`/search-api?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    displayResults(data);
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                });
+        });
+
+        function displayResults(data) {
+            const resultsContainer = document.getElementById('resultsContainer');
+            const searchResults = document.getElementById('searchResults');
+            
+            if (data.status === 'success' && data.results.length > 0) {
+                let html = '';
+                data.results.forEach(result => {
+                    html += `<div class="result-item">`;
+                    if (result.type === 'loan') {
+                        html += `<h6><span class="badge bg-primary">Loan</span> ${result.id}</h6>
+                                <p><strong>Borrower:</strong> ${result.borrower}<br>
+                                <strong>Amount:</strong> $${result.amount}<br>
+                                <strong>Status:</strong> ${result.status}</p>`;
+                    } else if (result.type === 'user') {
+                        html += `<h6><span class="badge bg-success">User</span> ${result.name}</h6>
+                                <p><strong>Email:</strong> ${result.email}<br>
+                                <strong>Category:</strong> ${result.category}</p>`;
+                    } else if (result.type === 'institution') {
+                        html += `<h6><span class="badge bg-info">Institution</span> ${result.name}</h6>
+                                <p><strong>Category:</strong> ${result.category}<br>
+                                <strong>Location:</strong> ${result.location}</p>`;
+                    }
+                    html += `</div>`;
+                });
+                resultsContainer.innerHTML = html;
+                searchResults.style.display = 'block';
+            } else {
+                resultsContainer.innerHTML = '<p class="text-muted">No results found.</p>';
+                searchResults.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

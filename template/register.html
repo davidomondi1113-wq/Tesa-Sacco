@@ -53,6 +53,30 @@
       .social-icon:hover {
         color: var(--accent-color);
       }
+      .navbar-brand-logo {
+        display: flex;
+        align-items: center;
+      }
+      .business-logo {
+        padding: 5px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .business-logo:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      }
+      .business-logo svg {
+        display: block;
+      }
+      @media (max-width: 768px) {
+        .navbar-brand-logo {
+          margin-top: 10px;
+          justify-content: center;
+        }
+      }
     </style>
     </head>
     <body>
@@ -63,9 +87,12 @@
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
+            <ul class="navbar-nav me-auto">
               <li class="nav-item">
                 <a class="nav-link" href="/about">About</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/search" title="Search for loans, users, or institutions">Search Feature</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="/login">Login</a>
@@ -74,6 +101,23 @@
                 <a class="nav-link active" href="/register">Register</a>
               </li>
             </ul>
+            <div class="navbar-brand-logo ms-auto">
+              <div class="business-logo">
+                <svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style="stop-color:#1E88E5;stop-opacity:1" />
+                      <stop offset="100%" style="stop-color:#43A047;stop-opacity:1" />
+                    </linearGradient>
+                  </defs>
+                  <circle cx="20" cy="20" r="18" fill="url(#logoGradient)" stroke="#fff" stroke-width="2"/>
+                  <path d="M12 12 L28 12 M12 16 L28 16 M12 20 L28 20 M12 24 L28 24 M12 28 L28 28" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                  <circle cx="20" cy="20" r="3" fill="#FFC107"/>
+                  <text x="45" y="16" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1E88E5">TESAA</text>
+                  <text x="45" y="28" font-family="Arial, sans-serif" font-size="8" fill="#666">Financial Solutions</text>
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
       </nav>

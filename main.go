@@ -59,6 +59,16 @@ func main() {
 			routes.MsiListHandler(w, r)
 		case "/make-payment":
 			routes.MakePaymentHandler(w, r)
+		case "/loan-management":
+			routes.LoanManagementHandler(w, r)
+		case "/mfi-directory":
+			routes.MfiDirectoryHandler(w, r)
+		case "/application-processing":
+			routes.ApplicationProcessingHandler(w, r)
+		case "/search":
+			routes.SearchHandler(w, r)
+		case "/search-api":
+			routes.SearchApiHandler(w, r)
 		default:
 			routes.ErrorHandler(w, r)
 		}
