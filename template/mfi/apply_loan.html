@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -163,7 +164,7 @@
         <div class="row justify-content-center">
           <div class="col-md-8">
             <div class="form-container">
-              <form id="loanApplicationForm" action="/process_loan" method="POST">
+              <form id="loanApplicationForm" action="/applyloan" method="POST">
                 <div class="user-info mb-4">
                   <h4>Your Information</h4>
                   <p><strong>Name:</strong> {{.Email}}</p>
@@ -176,6 +177,18 @@
                   <label for="loanAmount" class="form-label">Requested Loan Amount (KES)</label>
                   <input type="number" class="form-control" id="loanAmount" max="5000000" name="amount" required>
                 </div>
+                <div class="mb-3">
+                  <label for="loanPurpose" class="form-label">Loan Purpose</label>
+                  <select class="form-control" id="loanPurpose" name="purpose" required>
+                    <option value="">Select Purpose</option>
+                    <option value="Equipment">Equipment Purchase</option>
+                    <option value="Inventory">Inventory/Stock</option>
+                    <option value="Working Capital">Working Capital</option>
+                    <option value="Expansion">Business Expansion</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <input type="hidden" name="mfi_email" value="{{.Email}}">
                 <div class="mb-3 form-check">
                   <input type="checkbox" class="form-check-input" id="termsAgreement" required>
                   <label class="form-check-label" for="termsAgreement">I agree to the <a href="/terms" target="_blank">terms and conditions</a></label>
@@ -254,19 +267,15 @@
         }
     
         document.getElementById('loanApplicationForm').addEventListener('submit', function(e) {
-          e.preventDefault();
-          
-          // Here you would typically send the form data to your server
-          // For this example, we'll simulate a successful submission
-          
           const loanAmount = document.getElementById('loanAmount').value;
-          const filesUploaded = fileList.children.length > 0;
+          const loanPurpose = document.getElementById('loanPurpose').value;
           
-          if (loanAmount && filesUploaded) {
-            alert('Your loan application has been submitted successfully. Please check your dashboard for updates on your application status.');
-            window.location.href = '/dashboard';
+          if (loanAmount && loanPurpose) {
+            // Form will submit normally to server
+            return true;
           } else {
-            alert('Please ensure you have entered a loan amount and uploaded at least one financial record.');
+            e.preventDefault();
+            alert('Please fill in all required fields.');
           }
         });
       </script>

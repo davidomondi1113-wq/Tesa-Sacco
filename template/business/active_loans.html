@@ -132,74 +132,43 @@
           </div>
 
           <div class="row">
+            {{if .Loans}}
+            {{range $index, $loan := .Loans}}
             <div class="col-md-6">
               <div class="card">
                 <div class="card-body">
-                  <h5 class="card-title">Loan #1: Equipment Upgrade</h5>
+                  <h5 class="card-title">Loan #{{$loan.Id}}: {{$loan.Purpose}}</h5>
                   <div class="progress mb-3">
-                    <div
-                      class="progress-bar bg-success"
-                      role="progressbar"
-                      style="width: 40%"
-                      aria-valuenow="40"
-                      aria-valuemin="0"
-                      aria-valuemax="100"
-                    >
-                      40% Repaid
+                    <div class="progress-bar bg-{{if eq $loan.Status "approved"}}success{{else if eq $loan.Status "pending"}}warning{{else}}secondary{{end}}" role="progressbar" style="width: 25%">
+                      {{$loan.Status}}
                     </div>
                   </div>
                   <div class="loan-details">
-                    <p><strong>Loan Amount:</strong> Ksh. 10,000</p>
-                    <p><strong>Interest Rate:</strong> 8% per annum</p>
-                    <p><strong>Term:</strong> 24 months</p>
-                    <p><strong>Monthly Payment:</strong> Ksh. 452.73</p>
-                    <p><strong>Next Payment Due:</strong> May 15, 2023</p>
-                    <p><strong>Remaining Balance:</strong> Ksh. 6,000</p>
+                    <p><strong>Loan Amount:</strong> Ksh. {{$loan.Amount}}</p>
+                    <p><strong>Application Date:</strong> {{$loan.Date}}</p>
+                    <p><strong>Status:</strong> {{$loan.Status}}</p>
+                    <p><strong>Purpose:</strong> {{$loan.Purpose}}</p>
                   </div>
-                  <button
-                    class="btn btn-primary mt-3"
-                    data-bs-toggle="modal"
-                    data-bs-target="#paymentModal1"
-                  >
+                  {{if eq $loan.Status "approved"}}
+                  <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#paymentModal{{$index}}">
                     Make a Payment
                   </button>
+                  {{end}}
                 </div>
               </div>
             </div>
-            <div class="col-md-6">
+            {{end}}
+            {{else}}
+            <div class="col-12">
               <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title">Loan #2: Working Capital</h5>
-                  <div class="progress mb-3">
-                    <div
-                      class="progress-bar bg-success"
-                      role="progressbar"
-                      style="width: 60%"
-                      aria-valuenow="60"
-                      aria-valuemin="0"
-                      aria-valuemax="100"
-                    >
-                      60% Repaid
-                    </div>
-                  </div>
-                  <div class="loan-details">
-                    <p><strong>Loan Amount:</strong> Ksh. 5,000</p>
-                    <p><strong>Interest Rate:</strong> 7% per annum</p>
-                    <p><strong>Term:</strong> 12 months</p>
-                    <p><strong>Monthly Payment:</strong> Ksh. 433.33</p>
-                    <p><strong>Next Payment Due:</strong> May 20, 2023</p>
-                    <p><strong>Remaining Balance:</strong> Ksh. 2,000</p>
-                  </div>
-                  <button
-                    class="btn btn-primary mt-3"
-                    data-bs-toggle="modal"
-                    data-bs-target="#paymentModal2"
-                  >
-                    Make a Payment
-                  </button>
+                <div class="card-body text-center">
+                  <h5>No Active Loans</h5>
+                  <p class="text-muted">You don't have any active loans at the moment.</p>
+                  <a href="/loan-application" class="btn btn-primary">Apply for a Loan</a>
                 </div>
               </div>
             </div>
+            {{end}}
           </div>
 
           <div class="row mt-4">
@@ -221,46 +190,23 @@
                         </tr>
                       </thead>
                       <tbody>
+                        {{if .Loans}}
+                        {{range .Loans}}
                         <tr>
-                          <td>May 15, 2023</td>
-                          <td>Equipment Upgrade</td>
-                          <td>Ksh. 452.73</td>
-                          <td>Ksh. 385.73</td>
-                          <td>Ksh. 67.00</td>
-                          <td>Ksh. 5,614.27</td>
-                          <td>
-                            <span class="badge bg-warning">Upcoming</span>
-                          </td>
+                          <td>{{.Date}}</td>
+                          <td>{{.Purpose}}</td>
+                          <td>Ksh. {{.Amount}}</td>
+                          <td>-</td>
+                          <td>-</td>
+                          <td>Ksh. {{.Amount}}</td>
+                          <td><span class="badge bg-{{if eq .Status "approved"}}success{{else if eq .Status "pending"}}warning{{else}}secondary{{end}}">{{.Status}}</span></td>
                         </tr>
+                        {{end}}
+                        {{else}}
                         <tr>
-                          <td>May 20, 2023</td>
-                          <td>Working Capital</td>
-                          <td>Ksh. 433.33</td>
-                          <td>Ksh. 404.33</td>
-                          <td>Ksh. 29.00</td>
-                          <td>Ksh. 1,595.67</td>
-                          <td>
-                            <span class="badge bg-warning">Upcoming</span>
-                          </td>
+                          <td colspan="7" class="text-center text-muted">No loan repayment schedule available</td>
                         </tr>
-                        <tr>
-                          <td>Apr 15, 2023</td>
-                          <td>Equipment Upgrade</td>
-                          <td>Ksh. 452.73</td>
-                          <td>Ksh. 383.16</td>
-                          <td>Ksh. 69.57</td>
-                          <td>Ksh. 6,000.00</td>
-                          <td><span class="badge bg-success">Paid</span></td>
-                        </tr>
-                        <tr>
-                          <td>Apr 20, 2023</td>
-                          <td>Working Capital</td>
-                          <td>Ksh. 433.33</td>
-                          <td>Ksh. 401.63</td>
-                          <td>Ksh. 31.70</td>
-                          <td>Ksh. 2,000.00</td>
-                          <td><span class="badge bg-success">Paid</span></td>
-                        </tr>
+                        {{end}}
                       </tbody>
                     </table>
                   </div>

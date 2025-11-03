@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
   <head>
 <title>Business Transactions - Tesaa</title>
@@ -59,7 +60,7 @@
     <div class="container-fluid">
       <a class="navbar-brand" href="/">Tesaa</a>
       <div class="d-flex">
-        <span class="navbar-text me-3">Welcome, John's Small Business</span>
+        <span class="navbar-text me-3">Welcome, {{.Email}}</span>
         <a href="/logout" class="btn btn-outline-primary">Logout</a>
       </div>
     </div>
@@ -158,62 +159,21 @@
                 </tr>
               </thead>
               <tbody>
+                {{if .Loans}}
+                {{range .Loans}}
                 <tr>
-                  <td>2023-05-01</td>
-                  <td>Loan Repayment</td>
-                  <td>Outflow</td>
-                  <td class="transaction-negative">-Ksh. 750.00</td>
-                  <td><span class="badge bg-success">Completed</span></td>
+                  <td>{{.Date}}</td>
+                  <td>{{.Purpose}} Loan Application</td>
+                  <td>{{if eq .Status "approved"}}Inflow{{else}}Application{{end}}</td>
+                  <td class="{{if eq .Status "approved"}}transaction-positive{{else}}transaction-neutral{{end}}">{{if eq .Status "approved"}}Ksh. {{.Amount}}{{else}}-{{end}}</td>
+                  <td><span class="badge bg-{{if eq .Status "approved"}}success{{else if eq .Status "pending"}}warning{{else}}secondary{{end}}">{{.Status}}</span></td>
                 </tr>
+                {{end}}
+                {{else}}
                 <tr>
-                  <td>2023-04-15</td>
-                  <td>Loan Disbursement</td>
-                  <td>Inflow</td>
-                  <td class="transaction-positive">Ksh. 10,000.00</td>
-                  <td><span class="badge bg-success">Completed</span></td>
+                  <td colspan="5" class="text-center text-muted">No transactions found</td>
                 </tr>
-                <tr>
-                  <td>2023-04-01</td>
-                  <td>Loan Repayment</td>
-                  <td>Outflow</td>
-                  <td class="transaction-negative">-Ksh. 750.00</td>
-                  <td><span class="badge bg-success">Completed</span></td>
-                </tr>
-                <tr>
-                  <td>2023-03-15</td>
-                  <td>Loan Application Fee</td>
-                  <td>Outflow</td>
-                  <td class="transaction-negative">-Ksh. 50.00</td>
-                  <td><span class="badge bg-success">Completed</span></td>
-                </tr>
-                <tr>
-                  <td>2023-03-01</td>
-                  <td>Loan Repayment</td>
-                  <td>Outflow</td>
-                  <td class="transaction-negative">-Ksh. 750.00</td>
-                  <td><span class="badge bg-success">Completed</span></td>
-                </tr>
-                <tr>
-                  <td>2023-02-15</td>
-                  <td>Late Payment Fee</td>
-                  <td>Outflow</td>
-                  <td class="transaction-negative">-Ksh. 25.00</td>
-                  <td><span class="badge bg-success">Completed</span></td>
-                </tr>
-                <tr>
-                  <td>2023-02-05</td>
-                  <td>Loan Repayment</td>
-                  <td>Outflow</td>
-                  <td class="transaction-negative">-Ksh. 750.00</td>
-                  <td><span class="badge bg-warning">Late</span></td>
-                </tr>
-                <tr>
-                  <td>2023-01-15</td>
-                  <td>Loan Disbursement</td>
-                  <td>Inflow</td>
-                  <td class="transaction-positive">Ksh. 5,000.00</td>
-                  <td><span class="badge bg-success">Completed</span></td>
-                </tr>
+                {{end}}
               </tbody>
             </table>
           </div>

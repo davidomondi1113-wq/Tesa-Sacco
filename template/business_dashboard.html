@@ -57,7 +57,7 @@
       <div class="container-fluid">
         <a class="navbar-brand" href="/">Tesaa</a>
         <div class="d-flex">
-          <span class="navbar-text me-3">Welcome, {{.Email}}</span>
+          <span class="navbar-text me-3">Welcome, {{.User.Email}}</span>
           <a href="/login" class="btn btn-outline-primary">Logout</a>
         </div>
       </div>
@@ -118,8 +118,8 @@
               <div class="card">
                 <div class="card-body">
                   <h5 class="card-title">Active Loans</h5>
-                  <h2 class="card-text">2</h2>
-                  <p class="card-text text-muted">Total amount: Ksh. 15,000</p>
+                  <h2 class="card-text">{{len .Loans}}</h2>
+                  <p class="card-text text-muted">Total amount: Ksh. {{range $i, $loan := .Loans}}{{if $i}}{{end}}{{$loan.Amount}}{{end}}</p>
                 </div>
               </div>
             </div>
@@ -127,17 +127,17 @@
               <div class="card">
                 <div class="card-body">
                   <h5 class="card-title">Pending Applications</h5>
-                  <h2 class="card-text">1</h2>
-                  <p class="card-text text-muted">Requested amount: Ksh. 5,000</p>
+                  <h2 class="card-text">{{$pendingCount := 0}}{{range .Loans}}{{if eq .Status "pending"}}{{$pendingCount = add $pendingCount 1}}{{end}}{{end}}{{$pendingCount}}</h2>
+                  <p class="card-text text-muted">{{if .Loans}}Latest: {{(index .Loans 0).Date}}{{else}}No applications{{end}}</p>
                 </div>
               </div>
             </div>
             <div class="col-md-4">
               <div class="card">
                 <div class="card-body">
-                  <h5 class="card-title">Next Payment Due</h5>
-                  <h2 class="card-text">Ksh. 750</h2>
-                  <p class="card-text text-muted">Due date: May 15, 2023</p>
+                  <h5 class="card-title">Account Status</h5>
+                  <h2 class="card-text">{{if .Loans}}Active{{else}}New{{end}}</h2>
+                  <p class="card-text text-muted">Member since: {{.Id}}</p>
                 </div>
               </div>
             </div>
@@ -159,12 +159,18 @@
                         </tr>
                       </thead>
                       <tbody>
+                        {{if .Loans}}
                         {{ range .Loans}}
                         <tr>
                           <td>{{.Date}}</td>
                           <td>{{.Purpose}}</td>
                           <td class="text-danger">Ksh. {{.Amount}}</td>
-                          <td><span class="badge bg-success">{{.Status}}</span></td>
+                          <td><span class="badge bg-{{if eq .Status "approved"}}success{{else if eq .Status "pending"}}warning{{else}}secondary{{end}}">{{.Status}}</span></td>
+                        </tr>
+                        {{end}}
+                        {{else}}
+                        <tr>
+                          <td colspan="4" class="text-center text-muted">No transactions found</td>
                         </tr>
                         {{end}}
                       </tbody>
@@ -178,36 +184,40 @@
                 <div class="card-body">
                   <h5 class="card-title">Recent Transactions</h5>
                   <ul class="list-group list-group-flush">
+                    {{if .Loans}}
+                    {{ range .Loans}}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                      Loan Repayment
-                      <span class="badge bg-primary rounded-pill">Ksh. 750</span>
+                      {{.Purpose}} Loan
+                      <span class="badge bg-{{if eq .Status "approved"}}success{{else if eq .Status "pending"}}warning{{else}}secondary{{end}} rounded-pill">Ksh. {{.Amount}}</span>
                     </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                      Loan Disbursement
-                      <span class="badge bg-success rounded-pill">Ksh. 10,000</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                      Loan Repayment
-                      <span class="badge bg-primary rounded-pill">Ksh. 750</span>
-                    </li>
+                    {{end}}
+                    {{else}}
+                    <li class="list-group-item text-center text-muted">No recent transactions</li>
+                    {{end}}
                   </ul>
                 </div>
               </div>
               <div class="card mt-4">
                 <div class="card-body">
-                  <h5 class="card-title">Upcoming Events</h5>
+                  <h5 class="card-title">Quick Actions</h5>
                   <ul class="list-group list-group-flush">
                     <li class="list-group-item">
-                      <strong>Financial Planning Workshop</strong><br>
-                      <small class="text-muted">May 20, 2023</small>
+                      <a href="/loan-application" class="text-decoration-none">
+                        <strong>Apply for New Loan</strong><br>
+                        <small class="text-muted">Submit a new loan application</small>
+                      </a>
                     </li>
                     <li class="list-group-item">
-                      <strong>Loan Application Deadline</strong><br>
-                      <small class="text-muted">June 1, 2023</small>
+                      <a href="/active-loans" class="text-decoration-none">
+                        <strong>View Active Loans</strong><br>
+                        <small class="text-muted">Manage your current loans</small>
+                      </a>
                     </li>
                     <li class="list-group-item">
-                      <strong>Business Networking Event</strong><br>
-                      <small class="text-muted">June 15, 2023</small>
+                      <a href="/business-profile" class="text-decoration-none">
+                        <strong>Update Profile</strong><br>
+                        <small class="text-muted">Edit your business information</small>
+                      </a>
                     </li>
                   </ul>
                 </div>

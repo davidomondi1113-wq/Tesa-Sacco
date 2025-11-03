@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
     <title>Business Profile - Tesaa</title>
@@ -58,7 +59,7 @@
         <div class="container-fluid">
           <a class="navbar-brand" href="/">Tesaa</a>
           <div class="d-flex">
-            <span class="navbar-text me-3">Welcome, John's Small Business</span>
+            <span class="navbar-text me-3">Welcome, {{.Email}}</span>
             <a href="/logout" class="btn btn-outline-primary">Logout</a>
           </div>
         </div>
@@ -113,8 +114,8 @@
                 <div class="card">
                   <div class="card-body text-center">
                     <img src="https://via.placeholder.com/150" alt="John Doe" class="profile-picture mb-3">
-                    <h4>John's Small Business</h4>
-                    <p class="text-muted">Small Enterprise</p>
+                    <h4>{{.Email}}</h4>
+                    <p class="text-muted">Business Account</p>
                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit Profile</button>
                   </div>
                 </div>
@@ -124,23 +125,17 @@
                   <div class="card-body">
                     <h5 class="card-title">Business Information</h5>
                     <dl class="row">
-                      <dt class="col-sm-3">Business Name</dt>
-                      <dd class="col-sm-9">John's Small Business</dd>
+                      <dt class="col-sm-3">Email</dt>
+                      <dd class="col-sm-9">{{.Email}}</dd>
     
-                      <dt class="col-sm-3">Owner</dt>
-                      <dd class="col-sm-9">John Doe</dd>
+                      <dt class="col-sm-3">Account Type</dt>
+                      <dd class="col-sm-9">{{.InstitutionType}}</dd>
     
-                      <dt class="col-sm-3">Business Type</dt>
-                      <dd class="col-sm-9">Retail</dd>
+                      <dt class="col-sm-3">Member Since</dt>
+                      <dd class="col-sm-9">{{.Id}}</dd>
     
-                      <dt class="col-sm-3">Established</dt>
-                      <dd class="col-sm-9">2018</dd>
-    
-                      <dt class="col-sm-3">Employees</dt>
-                      <dd class="col-sm-9">5</dd>
-    
-                      <dt class="col-sm-3">Annual Revenue</dt>
-                      <dd class="col-sm-9">Ksh. 250,000</dd>
+                      <dt class="col-sm-3">Total Loans</dt>
+                      <dd class="col-sm-9">{{len .Loans}}</dd>
                     </dl>
                   </div>
                 </div>
@@ -149,34 +144,52 @@
                   <div class="card-body">
                     <h5 class="card-title">Contact Information</h5>
                     <dl class="row">
-                      <dt class="col-sm-3">Email</dt>
-                      <dd class="col-sm-9">john@smallbusiness.com</dd>
-    
-                      <dt class="col-sm-3">Phone</dt>
-                      <dd class="col-sm-9">+1 (555) 123-4567</dd>
-    
-                      <dt class="col-sm-3">Address</dt>
-                      <dd class="col-sm-9">123 Main St, Anytown, USA 12345</dd>
+                      <dt class="col-sm-3">Active Loans</dt>
+                      <dd class="col-sm-9">
+                        {{range .Loans}}
+                        <div class="mb-2">
+                          <strong>Loan #{{.Id}}</strong> - Ksh. {{.Amount}}<br>
+                          <small class="text-muted">{{.Purpose}} | Status: {{.Status}}</small>
+                        </div>
+                        {{else}}
+                        <span class="text-muted">No active loans</span>
+                        {{end}}
+                      </dd>
                     </dl>
                   </div>
                 </div>
     
                 <div class="card mt-4">
                   <div class="card-body">
-                    <h5 class="card-title">Financial Summary</h5>
-                    <dl class="row">
-                      <dt class="col-sm-3">Credit Score</dt>
-                      <dd class="col-sm-9">720 (Good)</dd>
-    
-                      <dt class="col-sm-3">Total Loans</dt>
-                      <dd class="col-sm-9">2</dd>
-    
-                      <dt class="col-sm-3">Outstanding Balance</dt>
-                      <dd class="col-sm-9">Ksh. 15,000</dd>
-    
-                      <dt class="col-sm-3">Repayment Status</dt>
-                      <dd class="col-sm-9"><span class="badge bg-success">On Time</span></dd>
-                    </dl>
+                    <h5 class="card-title">Borrowing History</h5>
+                    <div class="table-responsive">
+                      <table class="table table-sm">
+                        <thead>
+                          <tr>
+                            <th>Loan ID</th>
+                            <th>Amount</th>
+                            <th>Purpose</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {{range .Loans}}
+                          <tr>
+                            <td>{{.Id}}</td>
+                            <td>Ksh. {{.Amount}}</td>
+                            <td>{{.Purpose}}</td>
+                            <td>{{.Date}}</td>
+                            <td><span class="badge bg-{{if eq .Status "approved"}}success{{else if eq .Status "pending"}}warning{{else}}secondary{{end}}">{{.Status}}</span></td>
+                          </tr>
+                          {{else}}
+                          <tr>
+                            <td colspan="5" class="text-center text-muted">No loan history</td>
+                          </tr>
+                          {{end}}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>

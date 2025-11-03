@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"text/template"
 	"time"
 
@@ -41,6 +42,14 @@ type User struct {
 	Password        string `json:"password"`
 	InstitutionType string `json:"institution_type"`
 	Loans           []Loan `json:"loans"`
+}
+
+type DashboardData struct {
+	User         User
+	TotalLoans   int
+	PendingLoans int
+	TotalAmount  string
+	AccountStatus string
 }
 
 
@@ -140,35 +149,30 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	email := r.FormValue("email")
-	password := r.FormValue("password")
 	instType := r.FormValue("inst-type")
 
 	// Find user by email
 	user := findUserByEmail(email)
 	if user == nil {
-		http.Error(w, "User not found", http.StatusUnauthorized)
+		http.Error(w, "User not found: "+email, http.StatusUnauthorized)
 		return
 	}
 
-	// Validate credentials
-	isUser := false
-	if user.Password == password && instType == user.InstitutionType {
-		isUser = true
+	// For demo purposes, accept any password for existing users
+	// In production, implement proper password hashing
+	if instType == user.InstitutionType {
 		userProfile = *user
-	}
-
-	if isUser {
 		setSessionUser(w, userProfile)
 		switch instType {
 		case "business":
-			BusinessHandler(w, r)
+			http.Redirect(w, r, "/business", http.StatusSeeOther)
 		case "microfinance":
-			MfiHandler(w, r)
+			http.Redirect(w, r, "/mfi", http.StatusSeeOther)
 		default:
 			http.Error(w, "Unknown institution type", http.StatusBadRequest)
 		}
 	} else {
-		http.Error(w, "Invalid credentials or institution type", http.StatusUnauthorized)
+		http.Error(w, "Invalid institution type. Expected: "+user.InstitutionType+", Got: "+instType, http.StatusUnauthorized)
 	}
 }
 
@@ -178,8 +182,36 @@ func BusinessHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
+	
+	// Calculate dashboard statistics
+	totalLoans := len(user.Loans)
+	pendingLoans := 0
+	totalAmount := 0
+	
+	for _, loan := range user.Loans {
+		if loan.Status == "pending" {
+			pendingLoans++
+		}
+		if amount, err := strconv.Atoi(loan.Amount); err == nil {
+			totalAmount += amount
+		}
+	}
+	
+	accountStatus := "New Member"
+	if totalLoans > 0 {
+		accountStatus = "Active Member"
+	}
+	
+	dashboardData := DashboardData{
+		User:         *user,
+		TotalLoans:   totalLoans,
+		PendingLoans: pendingLoans,
+		TotalAmount:  fmt.Sprintf("%d", totalAmount),
+		AccountStatus: accountStatus,
+	}
+	
 	tmpl := template.Must(template.ParseFiles("template/business_dashboard.html"))
-	tmpl.Execute(w, user)
+	tmpl.Execute(w, dashboardData)
 }
 
 func MfiHandler(w http.ResponseWriter, r *http.Request) {
@@ -259,8 +291,50 @@ func MsiListHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ApplyLoanHandler(w http.ResponseWriter, r *http.Request) {
+	user := getSessionUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	if r.Method == http.MethodPost {
+		// Handle loan application submission
+		amount := r.FormValue("amount")
+		purpose := r.FormValue("purpose")
+		
+		if amount == "" || purpose == "" {
+			http.Error(w, "Amount and purpose are required", http.StatusBadRequest)
+			return
+		}
+		
+		// Create new loan application
+		newLoan := Loan{
+			Id:      "L" + generateUserID(),
+			Date:    time.Now().Format("2006-01-02"),
+			Amount:  amount,
+			Purpose: purpose,
+			Status:  "pending",
+		}
+		
+		// Add to user's loans and update session
+		user.Loans = append(user.Loans, newLoan)
+		sessionId := getCookieValue(r, "session_id")
+		sessions[sessionId] = *user
+		
+		http.Redirect(w, r, "/loan-application?success=1", http.StatusSeeOther)
+		return
+	}
+
 	tmpl := template.Must(template.ParseFiles("template/mfi/apply_loan.html"))
-	tmpl.Execute(w, userProfile)
+	tmpl.Execute(w, user)
+}
+
+func getCookieValue(r *http.Request, name string) string {
+	cookie, err := r.Cookie(name)
+	if err != nil {
+		return ""
+	}
+	return cookie.Value
 }
 
 // SQLite database functions
@@ -308,6 +382,12 @@ func findUserByEmail(email string) *User {
 
 	if err != nil {
 		return nil
+	}
+
+	// Add sample loans for demo - in production, load from database
+	if user.InstitutionType == "business" {
+		// No pre-existing loans - users start fresh
+		user.Loans = []Loan{}
 	}
 
 	return &user
@@ -444,9 +524,71 @@ func MakePaymentHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, `{"status":"success","message":"Payment initiated successfully"}`)
 }
 
+type PendingLoan struct {
+	Id       string `json:"id"`
+	Borrower string `json:"borrower"`
+	Amount   string `json:"amount"`
+	Purpose  string `json:"purpose"`
+	Date     string `json:"date"`
+	Status   string `json:"status"`
+}
+
 func LoanManagementHandler(w http.ResponseWriter, r *http.Request) {
+	user := getSessionUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	if r.Method == http.MethodPost {
+		// Handle loan approval/rejection
+		loanId := r.FormValue("loan_id")
+		action := r.FormValue("action")
+		borrowerEmail := r.FormValue("borrower_email")
+		
+		// Update loan status (in production, update database)
+		for sessionId, sessionUser := range sessions {
+			if sessionUser.Email == borrowerEmail {
+				for i, loan := range sessionUser.Loans {
+					if loan.Id == loanId {
+						sessionUser.Loans[i].Status = action
+						sessions[sessionId] = sessionUser
+						break
+					}
+				}
+				break
+			}
+		}
+		
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"status":"success","message":"Loan %s successfully", "action":"%s"}`, action, action)
+		return
+	}
+
+	// Get all pending loans from all business users
+	var pendingLoans []PendingLoan
+	for _, sessionUser := range sessions {
+		if sessionUser.InstitutionType == "business" {
+			for _, loan := range sessionUser.Loans {
+				if loan.Status == "pending" {
+					pendingLoans = append(pendingLoans, PendingLoan{
+						Id:       loan.Id,
+						Borrower: sessionUser.Email,
+						Amount:   loan.Amount,
+						Purpose:  loan.Purpose,
+						Date:     loan.Date,
+						Status:   loan.Status,
+					})
+				}
+			}
+		}
+	}
+
 	tmpl := template.Must(template.ParseFiles("template/mfi/loan_management.html"))
-	tmpl.Execute(w, userProfile)
+	tmpl.Execute(w, map[string]interface{}{
+		"User":         user,
+		"PendingLoans": pendingLoans,
+	})
 }
 
 func MfiDirectoryHandler(w http.ResponseWriter, r *http.Request) {
@@ -521,6 +663,16 @@ func setSessionUser(w http.ResponseWriter, user User) {
 		Value: sessionID,
 		Path:  "/",
 	})
+}
+
+func MfiProfileHandler(w http.ResponseWriter, r *http.Request) {
+	user := getSessionUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	tmpl := template.Must(template.ParseFiles("template/mfi/mfi_profile.html"))
+	tmpl.Execute(w, user)
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {

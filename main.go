@@ -71,6 +71,8 @@ func main() {
 			routes.SearchApiHandler(w, r)
 		case "/logout":
 			routes.LogoutHandler(w, r)
+		case "/mfi-profile":
+			routes.MfiProfileHandler(w, r)
 		default:
 			routes.ErrorHandler(w, r)
 		}
