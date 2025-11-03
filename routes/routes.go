@@ -47,10 +47,12 @@ type User struct {
 
 var userProfile User
 var db *sql.DB
+var sessions = make(map[string]User)
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
+	user := getSessionUser(r)
 	tmpl := template.Must(template.ParseFiles("template/index.html"))
-	tmpl.Execute(w, nil)
+	tmpl.Execute(w, user)
 }
 
 func AboutHandler(w http.ResponseWriter, r *http.Request) {
@@ -156,6 +158,7 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if isUser {
+		setSessionUser(w, userProfile)
 		switch instType {
 		case "business":
 			BusinessHandler(w, r)
@@ -170,13 +173,23 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func BusinessHandler(w http.ResponseWriter, r *http.Request) {
+	user := getSessionUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
 	tmpl := template.Must(template.ParseFiles("template/business_dashboard.html"))
-	tmpl.Execute(w, userProfile)
+	tmpl.Execute(w, user)
 }
 
 func MfiHandler(w http.ResponseWriter, r *http.Request) {
+	user := getSessionUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
 	tmpl := template.Must(template.ParseFiles("template/mfi_dashboard.html"))
-	tmpl.Execute(w, userProfile)
+	tmpl.Execute(w, user)
 }
 
 func ErrorHandler(w http.ResponseWriter, r *http.Request) {
@@ -196,23 +209,43 @@ func MfiReportDownloadHandler(w http.ResponseWriter, r *http.Request) {
 
 // business pages routes
 func BusinessActiveLoansHandler(w http.ResponseWriter, r *http.Request) {
+	user := getSessionUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
 	tmpl := template.Must(template.ParseFiles("template/business/active_loans.html"))
-	tmpl.Execute(w, userProfile)
+	tmpl.Execute(w, user)
 }
 
 func BusinessProfileHandler(w http.ResponseWriter, r *http.Request) {
+	user := getSessionUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
 	tmpl := template.Must(template.ParseFiles("template/business/business_profile.html"))
-	tmpl.Execute(w, userProfile)
+	tmpl.Execute(w, user)
 }
 
 func BusinessLoanApplicationHandler(w http.ResponseWriter, r *http.Request) {
+	user := getSessionUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
 	tmpl := template.Must(template.ParseFiles("template/business/loan_applications.html"))
-	tmpl.Execute(w, userProfile)
+	tmpl.Execute(w, user)
 }
 
 func BusinessTransactionsHandler(w http.ResponseWriter, r *http.Request) {
+	user := getSessionUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
 	tmpl := template.Must(template.ParseFiles("template/business/transactions.html"))
-	tmpl.Execute(w, userProfile)
+	tmpl.Execute(w, user)
 }
 
 func LoanApplicationHandler(w http.ResponseWriter, r *http.Request) {
@@ -466,6 +499,42 @@ func SearchApiHandler(w http.ResponseWriter, r *http.Request) {
 
 	jsonResponse, _ := json.Marshal(response)
 	fmt.Fprintf(w, string(jsonResponse))
+}
+
+func getSessionUser(r *http.Request) *User {
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		return nil
+	}
+	user, exists := sessions[cookie.Value]
+	if !exists {
+		return nil
+	}
+	return &user
+}
+
+func setSessionUser(w http.ResponseWriter, user User) {
+	sessionID := generateUserID()
+	sessions[sessionID] = user
+	http.SetCookie(w, &http.Cookie{
+		Name:  "session_id",
+		Value: sessionID,
+		Path:  "/",
+	})
+}
+
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("session_id")
+	if err == nil {
+		delete(sessions, cookie.Value)
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:   "session_id",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 

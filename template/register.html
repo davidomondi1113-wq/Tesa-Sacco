@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
     <title>Login - Tesaa</title>
@@ -139,15 +140,15 @@
             </div>
             <div class="mb-3">
               <label for="email" class="form-label">Email address</label>
-              <input type="email" class="form-control" id="email" name="email">
+              <input type="email" class="form-control" id="email" name="email" autocomplete="email">
             </div>
             <div class="mb-3">
               <label for="password" class="form-label">Password</label>
-              <input type="password" class="form-control" id="password" name="pass" required>
+              <input type="password" class="form-control" id="password" name="pass" autocomplete="new-password" required>
             </div>
             <div class="mb-3">
               <label for="confirm-password" class="form-label">Confirm Password</label>
-              <input type="password" class="form-control" id="confirm-password" name="confirm" required>
+              <input type="password" class="form-control" id="confirm-password" name="confirm" autocomplete="new-password" required>
             </div>
             <div id="business-fields">
               <div class="mb-3">
@@ -168,7 +169,7 @@
               </div>
               <div class="mb-3">
                 <label for="mfi-license" class="form-label">Phone number</label>
-                <input type="text" class="form-control" id="phone" name="phone" required>
+                <input type="text" class="form-control" id="phone" name="phone" autocomplete="tel" required>
               </div>
             </div>
             <button type="submit" class="btn btn-primary w-100">Sign up</button>

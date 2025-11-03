@@ -69,6 +69,8 @@ func main() {
 			routes.SearchHandler(w, r)
 		case "/search-api":
 			routes.SearchApiHandler(w, r)
+		case "/logout":
+			routes.LogoutHandler(w, r)
 		default:
 			routes.ErrorHandler(w, r)
 		}

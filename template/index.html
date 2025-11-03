@@ -232,12 +232,31 @@
             <li class="nav-item">
               <a class="nav-link" href="#success-stories">Success Stories</a>
             </li>
+            {{if .}}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-user-circle"></i> {{.Email}}
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                {{if eq .InstitutionType "business"}}
+                <li><a class="dropdown-item" href="/business">Dashboard</a></li>
+                <li><a class="dropdown-item" href="/business-profile">Profile</a></li>
+                {{else}}
+                <li><a class="dropdown-item" href="/mfi">Dashboard</a></li>
+                <li><a class="dropdown-item" href="/mfi-profile">Profile</a></li>
+                {{end}}
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/logout">Logout</a></li>
+              </ul>
+            </li>
+            {{else}}
             <li class="nav-item">
               <a class="nav-link btn btn-primary text-white px-3 mx-2" href="/login">Login</a>
             </li>
             <li class="nav-item">
               <a class="nav-link btn btn-secondary text-white px-3" href="/register">Register</a>
             </li>
+            {{end}}
           </ul>
         </div>
       </div>
