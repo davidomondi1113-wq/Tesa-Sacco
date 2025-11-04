@@ -210,8 +210,16 @@ func BusinessHandler(w http.ResponseWriter, r *http.Request) {
 		AccountStatus: accountStatus,
 	}
 	
-	tmpl := template.Must(template.ParseFiles("template/business_dashboard.html"))
-	tmpl.Execute(w, dashboardData)
+	tmpl, err := template.ParseFiles("template/business_dashboard.html")
+	if err != nil {
+		http.Error(w, "Template error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err = tmpl.Execute(w, dashboardData)
+	if err != nil {
+		http.Error(w, "Template execution error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func MfiHandler(w http.ResponseWriter, r *http.Request) {
@@ -597,8 +605,66 @@ func MfiDirectoryHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ApplicationProcessingHandler(w http.ResponseWriter, r *http.Request) {
+	user := getSessionUser(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	if r.Method == http.MethodPost {
+		// Handle loan approval/rejection
+		loanId := r.FormValue("loan_id")
+		action := r.FormValue("action")
+		borrowerEmail := r.FormValue("borrower_email")
+		
+		// Update loan status
+		for sessionId, sessionUser := range sessions {
+			if sessionUser.Email == borrowerEmail {
+				for i, loan := range sessionUser.Loans {
+					if loan.Id == loanId {
+						sessionUser.Loans[i].Status = action
+						sessions[sessionId] = sessionUser
+						break
+					}
+				}
+				break
+			}
+		}
+		
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"status":"success","message":"Loan %s successfully", "action":"%s"}`, action, action)
+		return
+	}
+
+	// Get all pending loans and calculate statistics
+	var pendingLoans []PendingLoan
+	approvedCount := 0
+	
+	for _, sessionUser := range sessions {
+		if sessionUser.InstitutionType == "business" {
+			for _, loan := range sessionUser.Loans {
+				if loan.Status == "pending" {
+					pendingLoans = append(pendingLoans, PendingLoan{
+						Id:       loan.Id,
+						Borrower: sessionUser.Email,
+						Amount:   loan.Amount,
+						Purpose:  loan.Purpose,
+						Date:     loan.Date,
+						Status:   loan.Status,
+					})
+				} else if loan.Status == "approved" {
+					approvedCount++
+				}
+			}
+		}
+	}
+
 	tmpl := template.Must(template.ParseFiles("template/mfi/application_processing.html"))
-	tmpl.Execute(w, userProfile)
+	tmpl.Execute(w, map[string]interface{}{
+		"User":          user,
+		"PendingLoans":  pendingLoans,
+		"ApprovedCount": approvedCount,
+	})
 }
 
 func SearchHandler(w http.ResponseWriter, r *http.Request) {

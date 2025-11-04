@@ -127,7 +127,7 @@
               <div class="card">
                 <div class="card-body">
                   <h5 class="card-title">Pending Applications</h5>
-                  <h2 class="card-text">{{$pendingCount := 0}}{{range .Loans}}{{if eq .Status "pending"}}{{$pendingCount = add $pendingCount 1}}{{end}}{{end}}{{$pendingCount}}</h2>
+                  <h2 class="card-text">{{.PendingLoans}}</h2>
                   <p class="card-text text-muted">{{if .Loans}}Latest: {{(index .Loans 0).Date}}{{else}}No applications{{end}}</p>
                 </div>
               </div>

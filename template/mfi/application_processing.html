@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
   <title>Application Processing - Tesaa MFI</title>
@@ -47,7 +48,7 @@
     <div class="container-fluid">
       <a class="navbar-brand" href="/">Tesaa</a>
       <div class="d-flex">
-        <span class="navbar-text me-3">Welcome, {{.Email}}</span>
+        <span class="navbar-text me-3">Welcome, {{.User.Email}}</span>
         <a href="/login" class="btn btn-outline-primary">Logout</a>
       </div>
     </div>
@@ -118,42 +119,26 @@
                       </tr>
                     </thead>
                     <tbody>
+                      {{if .PendingLoans}}
+                      {{range .PendingLoans}}
                       <tr>
-                        <td>APP001</td>
-                        <td>John Doe</td>
-                        <td>Ksh. 5,000</td>
-                        <td>Business Expansion</td>
-                        <td><span class="badge bg-warning">Pending</span></td>
-                        <td>2023-04-15</td>
+                        <td>{{.Id}}</td>
+                        <td>{{.Borrower}}</td>
+                        <td>Ksh. {{.Amount}}</td>
+                        <td>{{.Purpose}}</td>
+                        <td><span class="badge bg-warning">{{.Status}}</span></td>
+                        <td>{{.Date}}</td>
                         <td>
-                          <button class="btn btn-sm btn-success me-1">Approve</button>
-                          <button class="btn btn-sm btn-danger">Reject</button>
+                          <button class="btn btn-sm btn-success me-1" onclick="processLoan('{{.Id}}', '{{.Borrower}}', 'approved')">Approve</button>
+                          <button class="btn btn-sm btn-danger" onclick="processLoan('{{.Id}}', '{{.Borrower}}', 'rejected')">Reject</button>
                         </td>
                       </tr>
+                      {{end}}
+                      {{else}}
                       <tr>
-                        <td>APP002</td>
-                        <td>Jane Smith</td>
-                        <td>Ksh. 3,500</td>
-                        <td>Education</td>
-                        <td><span class="badge bg-info">Under Review</span></td>
-                        <td>2023-04-16</td>
-                        <td>
-                          <button class="btn btn-sm btn-success me-1">Approve</button>
-                          <button class="btn btn-sm btn-danger">Reject</button>
-                        </td>
+                        <td colspan="7" class="text-center text-muted">No pending loan applications</td>
                       </tr>
-                      <tr>
-                        <td>APP003</td>
-                        <td>Bob Johnson</td>
-                        <td>Ksh. 7,000</td>
-                        <td>Agriculture</td>
-                        <td><span class="badge bg-warning">Pending</span></td>
-                        <td>2023-04-17</td>
-                        <td>
-                          <button class="btn btn-sm btn-success me-1">Approve</button>
-                          <button class="btn btn-sm btn-danger">Reject</button>
-                        </td>
-                      </tr>
+                      {{end}}
                     </tbody>
                   </table>
                 </div>
@@ -171,11 +156,11 @@
               <div class="card-body">
                 <div class="row text-center">
                   <div class="col-md-6">
-                    <h3 class="text-primary">25</h3>
+                    <h3 class="text-primary">{{if .PendingLoans}}{{len .PendingLoans}}{{else}}0{{end}}</h3>
                     <p>Pending Applications</p>
                   </div>
                   <div class="col-md-6">
-                    <h3 class="text-success">18</h3>
+                    <h3 class="text-success">{{.ApprovedCount}}</h3>
                     <p>Approved This Month</p>
                   </div>
                 </div>
@@ -212,5 +197,26 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function processLoan(loanId, borrowerEmail, action) {
+      fetch('/application-processing', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: new URLSearchParams({
+          loan_id: loanId,
+          borrower_email: borrowerEmail,
+          action: action
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(`Loan ${action} successfully! Borrower will be notified.`);
+        location.reload();
+      })
+      .catch(error => {
+        alert('Error processing loan');
+      });
+    }
+  </script>
 </body>
 </html>
